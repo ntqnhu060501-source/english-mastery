@@ -48,7 +48,20 @@ lessons.push(
 {id:'b2-04',level:'B2',title:'Phân tích tin tức và độ tin cậy nguồn',time:'45 phút',goal:'Phân biệt dữ kiện, ý kiến, bằng chứng và ngôn ngữ thiên lệch.',teach:'Khi đọc tin, kiểm tra tác giả, ngày đăng, nguồn dữ liệu gốc, bằng chứng và liệu tiêu đề có phóng đại hay không. Phân biệt fact, opinion và claim.',examples:['The evidence suggests…','The claim remains unverified.','According to the report…'],vocab:['evidence – bằng chứng','claim – tuyên bố/nhận định','biased – thiên lệch'],dialogue:'A: Is this source reliable?\nB: It cites official data, but we should check the original report.\nA: So we shouldn’t accept the headline alone?\nB: Exactly.',mission:'Chọn một bản tin tiếng Anh, ghi ra 3 dữ kiện, 2 ý kiến và 1 điểm cần kiểm chứng.',homework:'Viết đoạn 120 từ đánh giá độ tin cậy của nguồn tin.',q:'The claim has not been independently ___.',opts:['verified','verify','verification'],ans:0,why:'Sau has not been dùng past participle: verified.'}
 );
 
-function renderLessons(){let levels=['A1','A2','B1','B2'];let html='';levels.forEach(l=>{let arr=lessons.filter(x=>x.level===l),done=arr.filter(x=>d.lessonDone.includes(x.id)).length;html+='<div class="section"><h3>'+l+'</h3><span class="muted">'+done+'/'+arr.length+' hoàn thành</span></div>';arr.forEach(x=>{let done=d.lessonDone.includes(x.id);html+='<button class="option" style="text-align:left" onclick="openLesson(\''+x.id+'\')"><b>'+(done?'✓ ':'')+x.title+'</b><br><span class="muted">'+x.time+' · '+x.goal+'</span></button>'})});lessonList.innerHTML=html;let done=d.lessonDone.length;courseProgress.innerHTML='<p><b>'+done+' / '+lessons.length+'</b> bài hoàn thành</p><div class="progress"><span style="width:'+Math.round(done/lessons.length*100)+'%"></span></div>'}
+function renderLessons(){
+let levels=['A1','A2','B1','B2'];let html='';
+levels.forEach(l=>{
+let arr=lessons.filter(x=>x.level===l),done=arr.filter(x=>d.lessonDone.includes(x.id)).length;
+html+='<div class="section"><h3>'+l+'</h3><span class="muted">'+done+'/'+arr.length+' hoàn thành</span></div>';
+arr.forEach(x=>{
+let completed=d.lessonDone.includes(x.id);
+html+='<button class="option" style="text-align:left" onclick="openLesson(\''+x.id+'\')"><b>'+(completed?'✓ ':'')+x.title+'</b><br><span class="muted">'+(x.track||'Ngôn ngữ nền tảng')+' · '+x.time+' · '+x.goal+'</span></button>';
+});
+});
+lessonList.innerHTML=html;
+let done=d.lessonDone.length;
+courseProgress.innerHTML='<p><b>'+done+' / '+lessons.length+'</b> bài hoàn thành</p><div class="progress"><span style="width:'+Math.round(done/lessons.length*100)+'%"></span></div><p class="muted">20 bài học thực hành, đa dạng chủ đề từ đời sống, mua sắm, ăn uống, du lịch, công việc, giao tiếp, xã hội và học thuật. Lộ trình hiện tại đi từ A1 đến B2; C1–C2 sẽ được xây tiếp.</p>';
+}
 function openLesson(id){
 let x=lessons.find(a=>a.id===id);if(!x)return;
 let done=d.lessonDone.includes(id);
