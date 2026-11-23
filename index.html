@@ -66,8 +66,25 @@ function speakCurrentFlashcard(){speakVocab(flashQueue[flashIndex])}
 function rateFlashcard(level){let w=flashQueue[flashIndex],r=d.review[w]||{interval:0,reps:0};let days=[0.0035,1,3,7][level];if(level===0){r.interval=0;r.reps=0}else{r.interval=level===1?1:(r.interval?Math.max(1,Math.round(r.interval*(level===2?2:3))):days);r.reps=(r.reps||0)+1}r.due=Date.now()+days*86400000;r.last=Date.now();r.level=level;d.review[w]=r;d.vocabStats.seen++;if(level>=2)d.vocabStats.correct++;save();flashIndex++;flashRevealed=false;showFlashcard()}
 function speakVocab(word){let v=vocabBank.find(x=>x.word===word);if(!('speechSynthesis' in window)){alert('Trình duyệt này chưa hỗ trợ phát âm tự động.');return}let u=new SpeechSynthesisUtterance(word+(v?' . '+v.example:''));u.lang='en-GB';u.rate=.88;speechSynthesis.cancel();speechSynthesis.speak(u)}
 function startVocabQuiz(){quizSet=vocabBank.slice().sort(()=>Math.random()-.5).slice(0,5);quizIndex=0;quizScore=0;showVocabQuiz()}
-function showVocabQuiz(){let host=document.getElementById('vocabTrainer');host.style.display='block';if(quizIndex>=quizSet.length){host.innerHTML='<h3>Kết quả: '+quizScore+'/5</h3><p>'+(quizScore>=4?'Rất tốt!':'Hãy xem lại nghĩa và ví dụ rồi thử lại nhé.')+'</p><button class="btn" onclick="startVocabQuiz()">Làm bài mới</button>';return}let v=quizSet[quizIndex];quizChoices=[v.meaning,...vocabBank.filter(x=>x.word!==v.word).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.meaning)].sort(()=>Math.random()-.5);let html='<div class="muted">Kiểm tra '+(quizIndex+1)+'/5</div><h3>Từ này có nghĩa là gì?</h3><h2 style="font:30px Georgia">'+v.word+'</h2><button class="btn alt" onclick="speakVocab(quizSet[quizIndex].word)">🔊 Nghe</button>';quizChoices.forEach((x,i)=>{html+='<button class="option" onclick="answerVocabQuiz('+i+')">'+String.fromCharCode(65+i)+'. '+x+'</button>'});host.innerHTML=html}
-function answerVocabQuiz(index){let v=quizSet[quizIndex],ok=quizChoices[index]===v.meaning;if(ok)quizScore++;d.vocabStats.seen++;if(ok)d.vocabStats.correct++;let host=document.getElementById('vocabTrainer');host.innerHTML='<div class="feedback">'+(ok?'✓ Chính xác!':'Chưa đúng. Nghĩa đúng: '+v.meaning)+'<br>'+v.example+'</div><button class="btn" onclick="quizIndex++;showVocabQuiz()">Tiếp tục</button>';save();refreshVocabStats()}
+function showVocabQuiz(){
+let host=document.getElementById('vocabTrainer');host.style.display='block';
+if(quizIndex>=quizSet.length){host.innerHTML='<h3>Kết quả: '+quizScore+'/5</h3><p>'+(quizScore>=4?'Rất tốt! Hãy tiếp tục dùng các từ này trong câu của riêng bà.':'Hãy xem lại nghĩa và ví dụ rồi thử lại nhé.')+'</p><button class="btn" onclick="startVocabQuiz()">Làm bài mới</button>';return}
+let v=quizSet[quizIndex],contextMode=quizIndex%2===1;
+let distractors=vocabBank.filter(x=>x.word!==v.word).sort(()=>Math.random()-.5).slice(0,3);
+let answer=contextMode?v.word:v.meaning;
+quizChoices=[answer,...distractors.map(x=>contextMode?x.word:x.meaning)].sort(()=>Math.random()-.5);
+let prompt=contextMode?'<p>Chọn từ phù hợp để hoàn thành câu:</p><div class="example">'+v.example.replace(new RegExp(v.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),'________')+'</div>':'<p>Từ này có nghĩa là gì?</p><h2 style="font:30px Georgia">'+v.word+'</h2>';
+let html='<div class="muted">Kiểm tra '+(quizIndex+1)+'/5 · '+(contextMode?'Dùng từ trong ngữ cảnh':'Nhận biết nghĩa')+'</div>'+prompt+'<button class="btn alt" onclick="speakVocab(quizSet[quizIndex].word)">🔊 Nghe</button>';
+quizChoices.forEach((x,i)=>{html+='<button class="option" onclick="answerVocabQuiz('+i+')">'+String.fromCharCode(65+i)+'. '+x+'</button>'});
+host.innerHTML=html;
+}
+function answerVocabQuiz(index){
+let v=quizSet[quizIndex],contextMode=quizIndex%2===1,expected=contextMode?v.word:v.meaning,ok=quizChoices[index]===expected;
+if(ok)quizScore++;d.vocabStats.seen++;if(ok)d.vocabStats.correct++;
+let host=document.getElementById('vocabTrainer');
+host.innerHTML='<div class="feedback">'+(ok?'✓ Chính xác!':'Chưa đúng. Đáp án: '+expected)+'<br>'+v.example+'</div><button class="btn" onclick="quizIndex++;showVocabQuiz()">Tiếp tục</button>';
+save();refreshVocabStats();
+}
 
 
 function renderLessons(){
