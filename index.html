@@ -49,7 +49,33 @@ lessons.push(
 );
 
 function renderLessons(){let levels=['A1','A2','B1','B2'];let html='';levels.forEach(l=>{let arr=lessons.filter(x=>x.level===l),done=arr.filter(x=>d.lessonDone.includes(x.id)).length;html+='<div class="section"><h3>'+l+'</h3><span class="muted">'+done+'/'+arr.length+' hoàn thành</span></div>';arr.forEach(x=>{let done=d.lessonDone.includes(x.id);html+='<button class="option" style="text-align:left" onclick="openLesson(\''+x.id+'\')"><b>'+(done?'✓ ':'')+x.title+'</b><br><span class="muted">'+x.time+' · '+x.goal+'</span></button>'})});lessonList.innerHTML=html;let done=d.lessonDone.length;courseProgress.innerHTML='<p><b>'+done+' / '+lessons.length+'</b> bài hoàn thành</p><div class="progress"><span style="width:'+Math.round(done/lessons.length*100)+'%"></span></div>'}
-function openLesson(id){let x=lessons.find(a=>a.id===id);if(!x)return;let done=d.lessonDone.includes(id);lessonDetail.innerHTML='<span class="tag">'+x.level+' · '+x.time+'</span><h2 style="font:28px Georgia">'+x.title+'</h2><p><b>Mục tiêu buổi học:</b> '+x.goal+'</p><div class="section"><h3>Tiến trình lớp học</h3><span class="muted">60 phút</span></div><div class="task"><div><b>01 · Khởi động</b><small>5 phút · kết nối chủ đề với trải nghiệm cá nhân.</small></div></div><div class="task"><div><b>02 · Bài giảng</b><small>15 phút · hiểu mẫu câu, từ vựng và cách dùng.</small></div></div><div class="task"><div><b>03 · Hội thoại mẫu</b><small>10 phút · đọc vai và nhận diện cách diễn đạt.</small></div></div><div class="task"><div><b>04 · Luyện tập</b><small>10 phút · tự tạo câu và phản xạ.</small></div></div><div class="task"><div><b>05 · Thực hành ngoài đời</b><small>15 phút · giải quyết tình huống thực tế.</small></div></div><div class="task"><div><b>06 · Tổng kết</b><small>5 phút · kiểm tra và giao bài về nhà.</small></div></div><h3>1. Kiến thức trọng tâm</h3><p style="white-space:pre-line">'+x.teach+'</p><h3>2. Ví dụ</h3>'+x.examples.map(e=>'<div class="example">'+e+'</div>').join('')+'<h3>3. Từ vựng / cụm từ</h3><p>'+x.vocab.map(v=>'<span class="chip">'+v+'</span>').join('')+'</p><h3>4. Hội thoại mẫu</h3><div class="example" style="white-space:pre-line">'+(x.dialogue||'Đọc các ví dụ và tự tạo hội thoại tương tự.')+'</div><h3>5. Nhiệm vụ ứng dụng</h3><div class="feedback">'+(x.mission||x.goal)+'</div><textarea id="lessonWork" rows="4" placeholder="Viết câu trả lời hoặc nội dung thực hành tại đây..."></textarea><h3>6. Kiểm tra nhanh</h3><p>'+x.q+'</p><div id="lessonOptions">'+x.opts.map((o,i)=>'<button class="option" onclick="checkLesson(\\''+id+'\\','+i+')">'+String.fromCharCode(65+i)+'. '+o+'</button>').join('')+'</div><div id="lessonFeedback"></div><h3>Bài tập về nhà</h3><p>'+(x.homework||'Ôn lại kiến thức và tự đặt 5 câu mới.')+'</p><button class="btn alt" onclick="saveLessonWork(\\''+id+'\\')">Lưu bài thực hành</button> <button class="btn" id="lessonComplete" '+(done?'disabled':'')+' onclick="finishLesson(\\''+id+'\\')">'+(done?'Đã hoàn thành ✓':'Hoàn thành buổi học')+'</button>'}
+function openLesson(id){
+let x=lessons.find(a=>a.id===id);if(!x)return;
+let done=d.lessonDone.includes(id);
+lessonDetail.innerHTML=`
+<span class="tag">${x.level} · ${x.time}</span>
+<h2 style="font:28px Georgia">${x.title}</h2>
+<p><b>Mục tiêu buổi học:</b> ${x.goal}</p>
+<div class="section"><h3>Tiến trình lớp học</h3><span class="muted">60 phút</span></div>
+<div class="task"><div><b>01 · Khởi động</b><small>5 phút · kết nối chủ đề với trải nghiệm cá nhân.</small></div></div>
+<div class="task"><div><b>02 · Bài giảng</b><small>15 phút · hiểu mẫu câu, từ vựng và cách dùng.</small></div></div>
+<div class="task"><div><b>03 · Hội thoại mẫu</b><small>10 phút · đọc vai và nhận diện cách diễn đạt.</small></div></div>
+<div class="task"><div><b>04 · Luyện tập</b><small>10 phút · tự tạo câu và phản xạ.</small></div></div>
+<div class="task"><div><b>05 · Thực hành ngoài đời</b><small>15 phút · giải quyết tình huống thực tế.</small></div></div>
+<div class="task"><div><b>06 · Tổng kết</b><small>5 phút · kiểm tra và giao bài về nhà.</small></div></div>
+<h3>1. Kiến thức trọng tâm</h3><p style="white-space:pre-line">${x.teach}</p>
+<h3>2. Ví dụ</h3>${x.examples.map(e=>'<div class="example">'+e+'</div>').join('')}
+<h3>3. Từ vựng / cụm từ</h3><p>${x.vocab.map(v=>'<span class="chip">'+v+'</span>').join('')}</p>
+<h3>4. Hội thoại mẫu</h3><div class="example" style="white-space:pre-line">${x.dialogue||'Đọc ví dụ và tự tạo hội thoại tương tự.'}</div>
+<h3>5. Nhiệm vụ ứng dụng</h3><div class="feedback">${x.mission||x.goal}</div>
+<textarea id="lessonWork" rows="4" placeholder="Viết câu trả lời hoặc nội dung thực hành tại đây..."></textarea>
+<h3>6. Kiểm tra nhanh</h3><p>${x.q}</p>
+<div id="lessonOptions">${x.opts.map((o,i)=>'<button class="option" onclick="checkLesson(\''+id+'\','+i+')">'+String.fromCharCode(65+i)+'. '+o+'</button>').join('')}</div>
+<div id="lessonFeedback"></div>
+<h3>Bài tập về nhà</h3><p>${x.homework||'Ôn lại kiến thức và tự đặt 5 câu mới.'}</p>
+<button class="btn alt" onclick="saveLessonWork('${id}')">Lưu bài thực hành</button>
+<button class="btn" id="lessonComplete" ${done?'disabled':''} onclick="finishLesson('${id}')">${done?'Đã hoàn thành ✓':'Hoàn thành buổi học'}</button>`;
+}
 function saveLessonWork(id){let el=document.getElementById('lessonWork');if(!el||!el.value.trim())return alert('Hãy nhập phần thực hành trước khi lưu.');d.notes['lesson_'+id]=el.value.trim();save();alert('Đã lưu bài thực hành.')}
 function checkLesson(id,i){let x=lessons.find(a=>a.id===id),ok=i===x.ans;document.querySelectorAll('#lessonOptions button').forEach((b,j)=>{b.disabled=true;if(j===x.ans)b.classList.add('selected')});lessonFeedback.innerHTML='<div class="feedback">'+(ok?'✓ Chính xác! ':'Chưa đúng. ')+x.why+'</div>'}
 function finishLesson(id){if(!d.lessonDone.includes(id)){d.lessonDone.push(id);complete()}renderLessons();openLesson(id)}
